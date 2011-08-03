@@ -18,6 +18,9 @@
   }
   
   function loadGraph(targetUrl, gid) {
+    if (!targetUrl) return;
+    console.log('loading ', targetUrl, 'into', gid);
+  
     $.get(targetUrl, function(pings) {
         
         var graph = $('#' + gid);
@@ -67,23 +70,10 @@
   $(function() {
       $.get('/targets', function(targets) {
           targets.forEach(function(target) {
-            console.log(target);
-            var div = $('<div>');
-            var h2 = $('<h2>');
-            h2.text(target.url);
-            div.append(h2);
-            $('#targets').append(div);
-
-            var gid = 'graph' + Math.round(Math.random() * 100000).toString();
-
-            var deleteButton = $('<input type="button" value="delete target" onclick="deleteTarget(\'' + target.pings_url + '\')">');
-            var reloadButton = $('<input type="button" value="reload" onclick="loadGraph(\'' + target.pings_url +'\', \'' + gid + '\')">');
-            div.append(reloadButton);
-            div.append(deleteButton);
-
-            var graph = $('<div style="display:none, height: 300px">');
-            graph.attr('id', gid);
-            div.append(graph);
+            var opt = $('<option>');
+            opt.text(target.url);
+            opt.attr('value', target.pings_url);
+            $('#targetsSelect').append(opt);
           });
       });
   });
@@ -95,7 +85,12 @@
     add target: <input type='text' name='url'>
     <input type='submit'>
   </form>
-  <div id='targets'>
+  latency graph:
+  <select id="targetsSelect" onchange='loadGraph(this.value, "graph");'>
+    <option>(select target)</option>
+  </select>
+  <hr/>
+  <div id='graph'>  
   </div>
 </body>
 </html>
