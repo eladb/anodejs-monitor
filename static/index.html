@@ -20,8 +20,14 @@
   function loadGraph(targetUrl, gid) {
     if (!targetUrl) return;
     console.log('loading ', targetUrl, 'into', gid);
+    
+    $('#loading').show();
+    $('#reloadButton').hide();
   
     $.get(targetUrl, function(pings) {
+
+        $('#loading').hide();
+        $('#reloadButton').show();
         
         var graph = $('#' + gid);
         graph.attr('style', 'height: 300px');
@@ -67,7 +73,13 @@
     });  
   }
   
+  function reloadGraph() {
+    loadGraph($('#targetsSelect')[0].value, 'graph');
+  }
+  
   $(function() {
+      $('#loading').hide();
+  
       $.get('/targets', function(targets) {
           targets.forEach(function(target) {
             var opt = $('<option>');
@@ -89,6 +101,8 @@
   <select id="targetsSelect" onchange='loadGraph(this.value, "graph");'>
     <option>(select target)</option>
   </select>
+  <img id="loading" src='images/spinning_donut.gif' height="13">
+  <input id='reloadButton' type='button' value='reload' onclick='reloadGraph();'>
   <hr/>
   <div id='graph'>  
   </div>
