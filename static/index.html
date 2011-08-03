@@ -1,0 +1,101 @@
+<html>
+<head>
+  <script src='http://code.jquery.com/jquery-1.6.2.min.js'></script>
+  <script src='scripts/ico/raphael-1.5.2.js'></script>
+  <script src='scripts/ico/es5.js'></script>
+  <script src='scripts/ico/ico.js'></script>
+  <script src='scripts/date.format.js'></script>
+  <script>
+  function deleteTarget(url) {
+    console.log('delete', url);
+    $.ajax({
+        url: url,
+        type: 'DELETE',
+        success: function(msg) {
+          console.log('target deleted', msg);
+        }
+    });
+  }
+  
+  function loadGraph(targetUrl, gid) {
+    $.get(targetUrl, function(pings) {
+        
+        var graph = $('#' + gid);
+        graph.attr('style', 'height: 300px');
+        graph.show();
+        graph.html('');
+        
+        var points = [];
+        var values = [];
+        var i = 0;
+        pings.forEach(function(ping) {
+            points.push(ping.latency);
+            
+            if (i % 50 == 0) {
+              var d = new Date(ping.timestamp);
+              values.push(d.format("h:MM:ss"));
+            } else {
+              values.push('');
+            }
+            
+            i++;
+        });
+  
+        new Ico.LineGraph(
+          gid,
+          [ points ],
+          {
+            colors: ['#228899' ],
+            curve_amount: 2,
+            mouseover_attributes: { stroke: 'green' },
+            font_size: 16,
+            labels: { values: values /*, angle: 30*/ },
+            units: 'ms',
+            units_position: 0,
+            value_labels: { marker_size: 10 },
+            background: { color: '#eeeeee', corners: 5 }, 
+            meanline: true,
+            grid: true,
+            mouse_pointer: true,
+            status_bar: true,
+            dot_radius: [ 0 ]
+          }
+        );
+    });  
+  }
+  
+  $(function() {
+      $.get('/targets', function(targets) {
+          targets.forEach(function(target) {
+            console.log(target);
+            var div = $('<div>');
+            var h2 = $('<h2>');
+            h2.text(target.url);
+            div.append(h2);
+            $('#targets').append(div);
+
+            var gid = 'graph' + Math.round(Math.random() * 100000).toString();
+
+            var deleteButton = $('<input type="button" value="delete target" onclick="deleteTarget(\'' + target.pings_url + '\')">');
+            var reloadButton = $('<input type="button" value="reload" onclick="loadGraph(\'' + target.pings_url +'\', \'' + gid + '\')">');
+            div.append(reloadButton);
+            div.append(deleteButton);
+
+            var graph = $('<div style="display:none, height: 300px">');
+            graph.attr('id', gid);
+            div.append(graph);
+          });
+      });
+  });
+  </script>
+</head>
+<body>
+  <h1>monitoring targets</h1>
+  <form method='post' action='/targets'>
+    add target: <input type='text' name='url'>
+    <input type='submit'>
+  </form>
+  <div id='targets'>
+  </div>
+</body>
+</html>
