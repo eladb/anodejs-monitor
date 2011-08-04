@@ -1,5 +1,5 @@
 var ping = require('./ping');
-var dash = require('./dash');
+var api = require('./api');
 
 var connection = 'mongo://157.55.174.56:10000/anodejs';
 
@@ -7,4 +7,4 @@ var connection = 'mongo://157.55.174.56:10000/anodejs';
 ping.start(connection);
 
 // start the dashboard web server
-dash.listen(process.argv[3], connection);
+api.listen(process.argv[3], connection);
